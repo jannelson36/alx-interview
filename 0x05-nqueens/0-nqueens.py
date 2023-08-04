@@ -2,53 +2,79 @@
 ''' Python3 program to solve N Queen '''
 import sys
 
-def is_safe(board, row, col, N):
-    # Check the left side of the current row
+
+if len(sys.argv) != 2:
+    print('Usage: nqueens N')
+    exit(1)
+N = sys.argv[1]
+try:
+    N = int(N)
+
+except:
+    print('N must be a number')
+    exit(1)
+
+if N < 4:
+    print('N must be at least 4')
+    exit(1)
+
+k = 1
+
+
+def printSolution(board):
+    """ A utility function to print solution """
+    queens = []
+    global k
+    k = k + 1
+    for i in range(N):
+        for j in range(N):
+            if board[i][j] == 1:
+                queens.append([i, j])
+    print(queens)
+
+
+def isSafe(board, row, col):
     for i in range(col):
-        if board[row][i] == 1:
+        if board[row][i]:
             return False
-
-    # Check upper diagonal - left side
-    for i, j in zip(range(row, -1, -1), range(col, -1, -1)):
-        if board[i][j] == 1:
+    i = row
+    j = col
+    while i >= 0 and j >= 0:
+        if board[i][j]:
             return False
-
-    # Check lower diagonal - left side
-    for i, j in zip(range(row, N), range(col, -1, -1)):
-        if board[i][j] == 1:
+        i -= 1
+        j -= 1
+    i = row
+    j = col
+    while j >= 0 and i < N:
+        if board[i][j]:
             return False
-
+        i = i + 1
+        j = j - 1
     return True
 
-def solve_nqueens(N):
-    def backtrack(board, col, N):
-        if col == N:
-            for i in range(N):
-                print("".join(["Q" if board[i][j] == 1 else "." for j in range(N)]))
-            print()
-            return
 
-        for i in range(N):
-            if is_safe(board, i, col, N):
-                board[i][col] = 1
-                backtrack(board, col + 1, N)
-                board[i][col] = 0
+def solveNQUtil(board, col):
+    """ This function solves the N Queen problem """
+    if col == N:
+        printSolution(board)
+        return True
+    res = False
+    for i in range(N):
+        if isSafe(board, i, col):
+            board[i][col] = 1
+            res = solveNQUtil(board, col + 1) or res
+            board[i][col] = 0
+    return res
 
-    if not N.isdigit():
-        print("N must be a number")
-        sys.exit(1)
 
-    N = int(N)
-    if N < 4:
-        print("N must be at least 4")
-        sys.exit(1)
+def solveNQ():
+    """ solve NQ """
+    board = [[0 for j in range(N)] for i in range(N)]
+    if solveNQUtil(board, 0) is False:
+        pass
+        return
+    return
 
-    board = [[0 for _ in range(N)] for _ in range(N)]
-    backtrack(board, 0, N)
 
-if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: nqueens N")
-        sys.exit(1)
-
-    solve_nqueens(sys.argv[1])
+solveNQ()
