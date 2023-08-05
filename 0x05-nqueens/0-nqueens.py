@@ -1,54 +1,47 @@
 #!/usr/bin/python3
-"""
-N queens
-"""
-
+"""Solves the N queens puzzle challenge"""
 import sys
 
 if len(sys.argv) != 2:
-    print('Usage: nqueens N')
-    exit(1)
+    print("Usage: nqueens N")
+    sys.exit(1)
 
 try:
-    n_q = int(sys.argv[1])
+    N = int(sys.argv[1])
+    if N < 4:
+        print("N must be at least 4")
+        sys.exit(1)
 except ValueError:
-    print('N must be a number')
-    exit(1)
-
-if n_q < 4:
-    print('N must be at least 4')
-    exit(1)
+    print("N must be a number")
+    sys.exit(1)
 
 
-def solve_nqueens(n):
-    '''self descriptive'''
-    if n == 0:
-        return [[]]
-    inner_solution = solve_nqueens(n - 1)
-    return [solution + [(n, i + 1)]
-            for i in range(n_q)
-            for solution in inner_solution
-            if safe_queen((n, i + 1), solution)]
+def resolve_matrix_for(queen, matrix, positions):
+    """
+    The algorithm eliminates the attack range of a queen 
+    on the chessboard and then proceeds to recursively 
+    find possible positions for queens in the next row.
+    """
+    positions.append(queen)
+
+    for cell in matrix[:]:
+        if any([cell == queen, cell[0] == queen[0], cell[1] == queen[1],
+                cell[0] - cell[1] == queen[0] - queen[1],
+                cell[0] + cell[1] == queen[0] + queen[1]]):
+            matrix.pop(matrix.index(cell))
+
+    # if end of the recursion
+    if len(matrix) == 0:
+        if len(positions) == N:
+            print(positions)
+        return
+
+    # else recursively check for possible queen positions
+    for queen_pos in [cell for cell in matrix
+                               if cell[0] == matrix[0][0]]:
+        resolve_matrix_for(queen_pos, matrix[:], positions[:])
 
 
-def attack_queen(square, queen):
-    '''self descriptive'''
-    (row1, col1) = square
-    (row2, col2) = queen
-    return (row1 == row2) or (col1 == col2) or\
-        abs(row1 - row2) == abs(col1 - col2)
-
-
-def safe_queen(sqr, queens):
-    '''self descriptive'''
-    for queen in queens:
-        if attack_queen(sqr, queen):
-            return False
-    return True
-
-
-for solution in reversed(solve_nqueens(n_q)):
-    result = []
-    for p in [list(p) for p in solution]:
-        result.append([i - 1 for i in p])
-    print(result)
+for i in range(N):
+    resolve_matrix_for([0, i], [[x, y] for x in range(N)
+                       for y in range(N)], [])
